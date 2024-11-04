@@ -26,16 +26,29 @@ const BackgroundContainer = styled('div')({
   },
 });
 
-function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+const Login = () => {
+  const [username, setUsername] = useState(''); 
+  const [password, setPassword] = useState(''); 
+  const navigate = useNavigate(); 
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    localStorage.setItem('username', username);
-    localStorage.setItem('password', password);
-    navigate('/levels');
+    try {
+      const response = await fetch('http://localhost:3000/api/user');
+      const users = await response.json();
+
+     
+      const user = users.find(u => u.username === username && u.password === password);
+      if (user) {
+        localStorage.setItem('username', username);
+        localStorage.setItem('password', password);
+        navigate('/levels'); 
+      } else {
+        alert('Ungültiger Benutzername oder Passwort'); 
+      }
+    } catch (error) {
+      console.error('Fehler beim Login:', error);
+    }
   };
 
   return (
