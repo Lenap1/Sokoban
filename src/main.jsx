@@ -8,29 +8,27 @@ import App from './App.jsx';
 import Login from './Login.jsx'; 
 import LevelOverview from './LevelOverview.jsx'; 
 import Game from './Game.jsx'; 
-import ErrorPage from './ErrorPage.jsx'; 
 import './index.css';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />, 
-    errorElement: <ErrorPage />, 
+    element: <App />,
     children: [
       {
-        index: true,
-        element: <Login />, 
+        index: true,           // Root route ("/") zeigt Login
+        element: <Login />,
       },
       {
-        path: "game",
-        element: <Game />,
-      },
-      {
-        path: "levels",
+        path: "levels",        // Route für die Level-Übersicht
         element: <LevelOverview />,
       },
-  ],
-},
+      {
+        path: "game/:levelId", // Route für das Game mit einer Level-ID
+        element: <Game />,
+      },
+    ],
+  },
 ]);
 
 createRoot(document.getElementById('root')).render(
