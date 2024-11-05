@@ -1,8 +1,7 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
-import api from './api.js';
-import cors from 'cors';
+import api from './routes/api.js';
 
 dotenv.config();
 
@@ -10,8 +9,10 @@ const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use(cors());
 app.use('/api', api);
+app.use('', (req, res) => {
+  res.send('Sokoban mid Jas und Lena, Kollegen. Viel Spass!');
+})
 
 async function startServer() {
   try {
