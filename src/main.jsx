@@ -16,15 +16,15 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        index: true,           // Root route ("/") zeigt Login
+        index: true,           
         element: <Login />,
       },
       {
-        path: "levels",        // Route für die Level-Übersicht
+        path: "levels",        
         element: <LevelOverview />,
       },
       {
-        path: "game/:levelId", // Route für das Game mit einer Level-ID
+        path: "game/:levelId", 
         element: <Game />,
       },
     ],

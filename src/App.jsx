@@ -3,10 +3,9 @@ import { Outlet } from 'react-router-dom';
 
 function App() {
   return (
-    <div className="container">
-      <h1>Welcome to the Sokoban Game</h1>
+    
       <Outlet />
-    </div>
+    
   );
 }
 
