@@ -3,6 +3,40 @@ import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
+
+
+// Highscores abrufen für ein bestimmtes Level
+router.get('/highscores/:level', async (req, res) => {
+  try {
+    const db = req.app.get('db');
+    const level = parseInt(req.params.level, 10);
+    const highscores = await db.collection('highscores').find({ level }).toArray();
+    res.json(highscores);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send();
+  }
+});
+
+// Highscore speichern
+router.post('/highscores', async (req, res) => {
+  try {
+    const db = req.app.get('db');
+    const scoreData = req.body;
+    const result = await db.collection('highscores').insertOne(scoreData);
+    if (result.acknowledged) {
+      res.status(201).json(scoreData);
+    } else {
+      res.status(500).send();
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send();
+  }
+});
+
+
+
 // Alle Benutzer abrufen
 router.get('/user', async (req, res) => {
     try {
