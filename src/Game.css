@@ -1,85 +1,108 @@
+/* Styling für das Game-Container */
 .game-container {
-    text-align: center;
-    padding: 20px;
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    max-width: 600px;
-    margin: auto;
-  }
-  
-  .game-title {
-    font-size: 2rem;
-    color: #333;
-  }
-  
-  .info {
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-  }
-  
-  .success-message {
-    color: green;
-    font-weight: bold;
-  }
-  
-  .error-message {
-    color: red;
-  }
-  
-  .game-board {
-    display: flex;
-    flex-direction: column;
-    margin: auto;
-  }
-  
-  .board-row {
-    display: flex;
-  }
-  
-  .board-cell {
-    width: 40px;
-    height: 40px;
-    position: relative;
-  }
-  
-  .cell-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .controls {
-    margin: 20px 0;
-  }
-  
-  .control-button {
-    margin: 5px;
-    padding: 10px;
-    font-size: 1rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .control-button:hover {
-    background-color: #0056b3;
-  }
-  
-  .navigation {
-    margin-top: 20px;
-  }
-  
-  .nav-link {
-    margin: 0 10px;
-    text-decoration: none;
-    color: #007bff;
-    font-size: 1rem;
-  }
-  
-  .nav-link:hover {
-    text-decoration: underline;
-  }
-  
+  font-family: 'Arial', sans-serif;
+  text-align: center;
+  background-color: #333;
+  padding: 0px;
+  border-radius: 0px;
+  max-width: 1400px;
+  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #333;
+  height: 800px;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+/* Styling für das Spielfeld */
+.game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  border: 2px solid #333;
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Styling für jede Zeile des Spiels */
+.game-row {
+  display: flex;
+  justify-content: center;
+}
+
+/* Styling für jedes Spielfeld */
+.game-cell {
+  width: 50px; /* Breite des Spielfeldes */
+  height: 50px; /* Höhe des Spielfeldes */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Größere Bilder */
+.game-piece {
+  width: 50px; /* Größe der Bilder (anpassbar) */
+  height: 50px; /* Größe der Bilder (anpassbar) */
+}
+
+/* Buttons und Steuerung */
+.control-buttons {
+  margin-top: 10px;
+}
+
+.move-button {
+  font-size: 1.5rem;
+  padding: 10px 20px;
+  margin: 5px;
+  background-color: #5cb85c;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.move-button:hover {
+  background-color: #4cae4c;
+}
+
+.actions {
+  margin-top: 20px;
+}
+
+.action-button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1.1rem;
+  background-color: #0275d8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-button:hover {
+  background-color: #025aa5;
+}
+
+.link-button {
+  text-decoration: none;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.level-completed {
+  color: green;
+  font-weight: bold;
+  margin-top: 10px;
+}

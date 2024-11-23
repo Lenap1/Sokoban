@@ -6,6 +6,7 @@ import boxImg from './assets/box.png';
 import goalImg from './assets/goal.png';
 import wallImg from './assets/wall.png';
 import floorImg from './assets/floor.png';
+import './Game.css';  // Hier wird die CSS-Datei eingebunden
 
 const levels = [
   `########\n#@     #\n#  $ . #\n########`,
@@ -29,8 +30,8 @@ function findPlayer(board) {
 }
 
 function Game() {
-  const { levelId } = useParams(); // Hole den levelId von der URL
-  const [currentLevel, setCurrentLevel] = useState(parseInt(levelId, 10)); // Setze den aktuellen Level basierend auf dem URL-Parameter
+  const { levelId } = useParams(); 
+  const [currentLevel, setCurrentLevel] = useState(parseInt(levelId, 10));
   const [board, setBoard] = useState([]);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0 });
   const [moveCount, setMoveCount] = useState(0);
@@ -42,12 +43,6 @@ function Game() {
     loadLevel(currentLevel);
     loadHighscore();
   }, [currentLevel]);
-
-  useEffect(() => {
-    if (levelId) {
-      setCurrentLevel(parseInt(levelId, 10)); // Update currentLevel, wenn levelId sich ändert
-    }
-  }, [levelId]);
 
   const loadLevel = (levelIndex) => {
     const level = levels[levelIndex];
@@ -138,70 +133,45 @@ function Game() {
       <h1>Sokoban Game</h1>
       <div>Aktuelle Züge: {moveCount}</div>
       <div>Highscore für dieses Level: {highscore !== null ? highscore : 'Noch kein Highscore vorhanden'}</div>
-      {isCompleted && <div style={{ color: 'green' }}>Level abgeschlossen!</div>}
-      <div style={{ color: 'red', minHeight: '40px', width: '100%', textAlign: 'center' }}>{error && error}</div>
-      <div className="game-board" style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        border: '2px solid black', 
-        padding: '10px', 
-        backgroundColor: 'white', 
-        boxShadow: '0 0 10px rgba(0, 0, 0, 0.5)',
-        height: 'auto',
-        width: 'fit-content',
-        maxWidth: '600px', 
-        margin: '0 auto' // Zentriert die Spielfeld-Box
-      }}>
+      {isCompleted && <div className="level-completed">Level abgeschlossen!</div>}
+      <div className="error-message">{error && error}</div>
+      <div className="game-board">
         {board.map((row, y) => (
-          <div key={y} style={{ display: 'flex', justifyContent: 'center' }}>
+          <div key={y} className="game-row">
             {row.map((cell, x) => (
-              <div key={x} style={{ width: '40px', height: '40px' }}>
-                {cell === '@' && <img src={playerImg} alt="Player" style={{ width: '100%' }} />}
-                {cell === '$' && <img src={boxImg} alt="Box" style={{ width: '100%' }} />}
-                {cell === '.' && <img src={goalImg} alt="Goal" style={{ width: '100%' }} />}
-                {cell === '#' && <img src={wallImg} alt="Wall" style={{ width: '100%' }} />}
-                {cell === ' ' && <img src={floorImg} alt="Floor" style={{ width: '100%' }} />}
+              <div key={x} className="game-cell">
+                {cell === '@' && <img src={playerImg} alt="Player" className="game-piece" />}
+                {cell === '$' && <img src={boxImg} alt="Box" className="game-piece" />}
+                {cell === '.' && <img src={goalImg} alt="Goal" className="game-piece" />}
+                {cell === '#' && <img src={wallImg} alt="Wall" className="game-piece" />}
+                {cell === ' ' && <img src={floorImg} alt="Floor" className="game-piece" />}
               </div>
             ))}
           </div>
         ))}
       </div>
-      <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-        <div style={{ display: 'flex', gap: '5px' }}>
-          <button onClick={() => movePlayer(-1, 0)} style={buttonStyle}>←</button>
-          <button onClick={() => movePlayer(1, 0)} style={buttonStyle}>→</button>
+      <div className="controls">
+        <div className="control-buttons">
+          <button onClick={() => movePlayer(-1, 0)} className="move-button">←</button>
+          <button onClick={() => movePlayer(1, 0)} className="move-button">→</button>
         </div>
-        <div style={{ display: 'flex', gap: '5px' }}>
-          <button onClick={() => movePlayer(0, -1)} style={buttonStyle}>↑</button>
-          <button onClick={() => movePlayer(0, 1)} style={buttonStyle}>↓</button>
+        <div className="control-buttons">
+          <button onClick={() => movePlayer(0, -1)} className="move-button">↑</button>
+          <button onClick={() => movePlayer(0, 1)} className="move-button">↓</button>
         </div>
       </div>
-      <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <button style={buttonStyle}>Back to Login</button>
+      <div className="actions">
+        <Link to="/" className="link-button">
+          <button className="action-button">Back to Login</button>
         </Link>
-        <Link to="/levels" style={{ textDecoration: 'none' }}>
-          <button style={buttonStyle}>Go to Level Overview</button>
+        <Link to="/levels" className="link-button">
+          <button className="action-button">Go to Level Overview</button>
         </Link>
-        <button onClick={restartLevel} style={buttonStyle}>Neustarten</button>
-        <button onClick={nextLevel} style={buttonStyle}>Nächstes Level</button>
+        <button onClick={restartLevel} className="action-button">Neustarten</button>
+        <button onClick={nextLevel} className="action-button">Nächstes Level</button>
       </div>
     </div>
   );
 }
-
-const buttonStyle = {
-  padding: '3px 6px', // Kleinere Polsterung für kleinere Buttons
-  backgroundColor: '#4CAF50',
-  color: 'white',
-  border: 'none',
-  borderRadius: '5px',
-  cursor: 'pointer',
-  transition: 'background-color 0.3s',
-  fontSize: '12px', // Kleinere Schriftgröße
-  minWidth: '30px', // Minimale Breite der Buttons
-};
-
 
 export default Game;
