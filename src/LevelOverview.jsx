@@ -1,8 +1,7 @@
-import React from 'react'; 
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Typography, Box } from '@mui/material';
 import { styled } from '@mui/system';
-
 
 const levels = [
   { id: 0, name: 'Level 1' },
@@ -12,59 +11,67 @@ const levels = [
   { id: 4, name: 'Level 5' },
 ];
 
-
 const LevelContainer = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   minHeight: '100vh',
-  backgroundColor: '#1a1a1a', 
-  color: '#fff',
-  padding: '0 20px',
+  backgroundColor: '#101010', 
+  color: '#E6E6E6', 
+  padding: '40px 20px',
   textAlign: 'center',
   width: '100%',
-  overflowX: 'hidden',
+  maxWidth: '1380px', 
+  margin: '0 auto',
+  overflow: 'hidden', 
+  boxSizing: 'border-box', 
 });
 
 const Title = styled(Typography)({
   fontSize: '48px',
-  fontWeight: '800',
-  color: '#00aaff', 
+  fontWeight: '700',
+  color: '#1E88E5', 
   marginBottom: '20px',
 });
 
 const SubTitle = styled(Typography)({
-  fontSize: '24px',
-  color: '#b0b0b0', 
-  marginBottom: '40px',
+  fontSize: '22px',
+  color: '#B0B0B0', 
+  marginBottom: '30px',
+  fontStyle: 'italic',
 });
 
 const LevelButton = styled(Button)({
-  margin: '15px',
-  padding: '25px 60px',
-  backgroundColor: '#00aaff', 
-  color: '#fff',
-  borderRadius: '10px',
-  fontSize: '26px',
+  margin: '0px',
+  padding: '20px 50px',
+  backgroundColor: '#1E88E5', 
+  color: '#FFFFFF', 
+  borderRadius: '30px',
+  fontSize: '20px',
+  fontWeight: '600',
   textTransform: 'uppercase',
   boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
   '&:hover': {
-    backgroundColor: '#0077cc', 
-    boxShadow: '0 12px 20px rgba(0, 0, 0, 0.3)',
+    backgroundColor: '#1565C0', 
+    boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
+  },
+  transition: 'background-color 0.3s ease, transform 0.2s ease',
+  '&:active': {
+    transform: 'scale(0.98)', 
   },
 });
 
 const BackButton = styled(Button)({
   marginTop: '40px',
   padding: '15px 50px',
-  backgroundColor: '#333', 
-  color: '#fff',
-  borderRadius: '10px',
+  backgroundColor: '#333333', 
+  color: '#E6E6E6',
+  borderRadius: '30px',
   fontSize: '18px',
   textTransform: 'none',
   '&:hover': {
-    backgroundColor: '#222', 
+    backgroundColor: '#444444', 
   },
 });
 
@@ -72,7 +79,7 @@ function LevelOverview() {
   return (
     <LevelContainer>
       <Title>Wähle dein Level</Title>
-      <SubTitle>Bereit, dich der Herausforderung zu stellen?</SubTitle>
+      <SubTitle>Bereit für das Abenteuer?</SubTitle>
 
       <Box
         sx={{
@@ -80,6 +87,7 @@ function LevelOverview() {
           flexWrap: 'wrap',
           justifyContent: 'center',
           width: '100%',
+          gap: '20px', 
         }}
       >
         {levels.map((level) => (
