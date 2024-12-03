@@ -1,4 +1,4 @@
-/* Styling für das Game-Container */
+
 .game-container {
   font-family: 'Arial', sans-serif;
   text-align: center;
@@ -17,7 +17,7 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* Styling für das Spielfeld */
+
 .game-board {
   display: flex;
   flex-direction: column;
@@ -30,28 +30,28 @@ h1 {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Styling für jede Zeile des Spiels */
+
 .game-row {
   display: flex;
   justify-content: center;
 }
 
-/* Styling für jedes Spielfeld */
+
 .game-cell {
-  width: 50px; /* Breite des Spielfeldes */
-  height: 50px; /* Höhe des Spielfeldes */
+  width: 50px; 
+  height: 50px; 
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Größere Bilder */
+
 .game-piece {
-  width: 50px; /* Größe der Bilder (anpassbar) */
-  height: 50px; /* Größe der Bilder (anpassbar) */
+  width: 50px; 
+  height: 50px; 
 }
 
-/* Buttons und Steuerung */
+
 .control-buttons {
   margin-top: 10px;
 }

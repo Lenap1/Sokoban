@@ -6,7 +6,7 @@ import boxImg from './assets/box.png';
 import goalImg from './assets/goal.png';
 import wallImg from './assets/wall.png';
 import floorImg from './assets/floor.png';
-import './Game.css';  // Hier wird die CSS-Datei eingebunden
+import './Game.css';  
 
 const levels = [
   `########\n#@     #\n#  $ . #\n########`,
