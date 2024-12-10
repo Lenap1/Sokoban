@@ -5,15 +5,23 @@ import dotenv from 'dotenv';
 import api from './routes/api.js';
 import register from './register.js';
 import oAuthModel from './oAuthModel.js';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
 const port = 3000;
 
+// CORS Konfiguration
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite default port
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
 
 
 try {
@@ -40,11 +48,8 @@ try {
 
   // start server
   app.listen(port, () => {
-    console.log('Example app listening on port ${port}');
+    console.log(`Example app listening on port ${port}`);
   });
 } catch (err) {
   console.error(err);
 }
-
-
-

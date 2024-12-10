@@ -1,36 +1,77 @@
 import express from 'express';
- import { v4 } from 'uuid';
- import bcrypt from 'bcrypt';
+import { v4 } from 'uuid';
+import bcrypt from 'bcrypt';
 
- const router = express.Router();
+const router = express.Router();
 
- router.post('/', async (req, res) => {
+// E-Mail Validierung
+const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+};
+
+// Passwort Validierung
+const validatePassword = (password) => {
+    return password.length >= 8 && 
+           /[A-Z]/.test(password) && 
+           /[a-z]/.test(password) && 
+           /[0-9]/.test(password);
+};
+
+router.post('/', async (req, res) => {
     try {
         const db = req.app.get('db');
-        
-        // TODO: validate req.body (email)
-        const insertion = await db.collection('user_auth').insertOne({ username: req.body.email });
+        const { email, password } = req.body;
+
+        // Validiere E-Mail
+        if (!email || !validateEmail(email)) {
+            return res.status(400).json({ error: 'Ungültige E-Mail-Adresse' });
+        }
+
+        // Validiere Passwort
+        if (!password || !validatePassword(password)) {
+            return res.status(400).json({ 
+                error: 'Passwort muss mindestens 8 Zeichen lang sein und Großbuchstaben, Kleinbuchstaben und Zahlen enthalten' 
+            });
+        }
+
+        // Prüfe ob Benutzer bereits existiert
+        const existingUser = await db.collection('user_auth').findOne({ username: email });
+        if (existingUser) {
+            return res.status(409).json({ error: 'E-Mail bereits registriert' });
+        }
+
+        // Erstelle neuen Benutzer
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const insertion = await db.collection('user_auth').insertOne({ 
+            username: email,
+            password: hashedPassword,
+            created_at: new Date(),
+            active: false
+        });
+
         if (insertion.acknowledged) {
             const token = v4();
             const tokenInsertion = await db.collection('token').insertOne({
                 emailToken: token,
-                emailTokenExpiresAt: new Date(Date.now() + (1000 * 60 * 60)), // now plus 60 minutes
+                emailTokenExpiresAt: new Date(Date.now() + (1000 * 60 * 60)), // 1 Stunde
                 user_id: insertion.insertedId,
-    });
+                type: 'activation'
+            });
 
-    if (tokenInsertion.acknowledged) {
-        console.log(`Activation link: http://localhost:3000/activate/${token}`);
-
-        res.status(201).send();
-    } else {
-        res.status(500).send();
-    }
-    } else {
-        res.status(500).send();
-    }
-} catch(err) {
-    console.error(err);
-    res.status(500).send();
+            if (tokenInsertion.acknowledged) {
+                // Hier könnte später E-Mail-Versand implementiert werden
+                console.log(`Aktivierungslink: http://localhost:3000/activate/${token}`);
+                return res.status(201).json({ 
+                    message: 'Registrierung erfolgreich. Bitte aktivieren Sie Ihren Account.' 
+                });
+            }
+        }
+        
+        throw new Error('Fehler bei der Registrierung');
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ error: 'Interner Server-Fehler' });
     }
 });
 
