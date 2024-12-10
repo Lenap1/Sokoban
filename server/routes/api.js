@@ -74,25 +74,29 @@ router.get('/user/:id', async (req, res) => {
 // Benutzer erstellen
 router.post('/user', async (req, res) => {
   try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).send("Missing required fields");
+    }
+
     const db = req.app.get('db');
+    const existingUser = await db.collection('users').findOne({ email });
+    if (existingUser) {
+      return res.status(400).send("Email already exists");
+    }
+
     const insertion = await db.collection('users').insertOne(req.body); 
     if (insertion.acknowledged) {
-      const user = await db.collection('users')
-        .findOne({ _id: insertion.insertedId }); 
-    
-      if (user) {
-        res.status(201).json(user);
-      } else {
-        res.status(404).send();
-      }
+      const user = await db.collection('users').findOne({ _id: insertion.insertedId }); 
+      res.status(201).json(user);
     } else {
       res.status(500).send();
     }
-  } catch(err) {
+  } catch (err) {
     console.error(err);
     res.status(500).send();
-    }
-}); 
+  }
+});
 
 // Benutzer akt
 router.put('/user/:id', async (req, res) => {
