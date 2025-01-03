@@ -1,41 +1,43 @@
-
 .game-container {
   font-family: 'Arial', sans-serif;
   text-align: center;
-  background-color: #333;
+  background-color: #101010;  /* Dunkelgrau */
   padding: 0px;
   border-radius: 0px;
-  max-width: 1400px;
+  max-width: 1800px;
   margin: 0 auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #333;
   height: 800px;
+  display: flex;
+  flex-direction: column; /* Um sicherzustellen, dass die Inhalte vertikal angeordnet sind */
+  justify-content: flex-start; /* Verschiebt den Inhalt nach oben */
+  align-items: center; /* Zentriert das Spiel horizontal */
+  min-height: 100vh; /* Stellt sicher, dass es die gesamte Höhe des Viewports nutzt */
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 2.5rem; /* Größere Schrift */
+  font-weight: bold; /* Dickere Schrift */
+  margin-top: 20px; /* Etwas Abstand nach oben */
   margin-bottom: 20px;
+  color: #0275d8; /* Blau für die Schrift */
 }
-
 
 .game-board {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
-  border: 2px solid #333;
+  width: 600px;
   padding: 10px;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  margin-top: 50px;
 }
-
 
 .game-row {
   display: flex;
   justify-content: center;
 }
-
 
 .game-cell {
   width: 50px; 
@@ -45,12 +47,10 @@ h1 {
   align-items: center;
 }
 
-
 .game-piece {
   width: 50px; 
   height: 50px; 
 }
-
 
 .control-buttons {
   margin-top: 10px;
@@ -60,7 +60,7 @@ h1 {
   font-size: 1.5rem;
   padding: 10px 20px;
   margin: 5px;
-  background-color: #5cb85c;
+  background-color: #0275d8; /* Blau für Buttons */
   border: none;
   color: white;
   cursor: pointer;
@@ -69,7 +69,7 @@ h1 {
 }
 
 .move-button:hover {
-  background-color: #4cae4c;
+  background-color: #025aa5; /* Dunkleres Blau für Hover-Effekt */
 }
 
 .actions {
@@ -80,7 +80,7 @@ h1 {
   padding: 10px 20px;
   margin: 10px;
   font-size: 1.1rem;
-  background-color: #0275d8;
+  background-color: rgba(255, 255, 255, 0.1);
   color: white;
   border: none;
   border-radius: 5px;
@@ -89,7 +89,7 @@ h1 {
 }
 
 .action-button:hover {
-  background-color: #025aa5;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .link-button {
@@ -98,11 +98,31 @@ h1 {
 
 .error-message {
   color: red;
-  margin-top: 10px;
+  font-size: 1.2rem; /* Größere Schrift */
+  font-weight: bold; /* Dickere Schrift */
+  margin-top: 5px; /* Text näher nach oben verschieben */
 }
 
 .level-completed {
   color: green;
-  font-weight: bold;
-  margin-top: 10px;
+  font-size: 1.2rem; /* Größere Schrift */
+  font-weight: bold; /* Dickere Schrift */
+  margin-top: 5px; /* Text näher nach oben verschieben */
+}
+
+.current-move, .highscore {
+  color: #0275d8; /* Blau */
+  font-size: 1.5rem; /* Größere Schrift */
+  font-weight: bold; /* Dickere Schrift */
+  margin-top: 5px; /* Text näher nach oben verschieben */
+}
+
+.move-button {
+  font-size: 20px;
+  padding: 14px 28px;
+}
+
+.action-button {
+  font-size: 20px;
+  padding: 14px 28px;
 }

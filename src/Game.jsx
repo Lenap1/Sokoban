@@ -6,15 +6,48 @@ import boxImg from './assets/box.png';
 import goalImg from './assets/goal.png';
 import wallImg from './assets/wall.png';
 import floorImg from './assets/floor.png';
-import './Game.css';  
+import './Game.css';
 
 const levels = [
-  `########\n#@     #\n#  $ . #\n########`,
-  `########\n#@ $ . #\n#   .  #\n########`,
-  `########\n#@    .#\n# $    #\n########`,
-  `########\n#  @   #\n# $  . #\n########`,
-  `########\n#@   # #\n# $ .  #\n########`,
+  // Level 1: Einfaches Layout
+  `########
+  #@     #
+  #  $ . #
+  ########`,
+
+  // Level 2: Mehr Platz für Bewegungen
+  `##########
+  #@   $   #
+  #   ##   #
+  # $ ## . #
+  #   ##   #
+  ##########`,
+
+  // Level 3: Komplexeres Layout mit mehr Hindernissen
+  `##########
+  #@  $  . #
+  #   ##   #
+  #   ## $ #
+  #   .    #
+  ##########`,
+
+  // Level 4: Engeres Labyrinth mit weniger Bewegungsfreiheit
+  `##########
+  #@   .   #
+  #  $  ## #
+  # $   .  #
+  #   ##   #
+  ##########`,
+
+  // Level 5: Mehrere Kisten und Ziele
+  `##########
+  #@  .    #
+  #  $  $  #
+  #  .  .  #
+  ##########`,
+
 ];
+
 
 function parseLevel(levelStr) {
   return levelStr.split('\n').map(row => row.split(''));
@@ -30,7 +63,7 @@ function findPlayer(board) {
 }
 
 function Game() {
-  const { levelId } = useParams(); 
+  const { levelId } = useParams();
   const [currentLevel, setCurrentLevel] = useState(parseInt(levelId, 10));
   const [board, setBoard] = useState([]);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0 });
@@ -92,7 +125,7 @@ function Game() {
   };
 
   const checkCompletion = (updatedBoard) => {
-    const allBoxesOnGoals = updatedBoard.every(row => 
+    const allBoxesOnGoals = updatedBoard.every(row =>
       row.every(cell => cell !== '$' || cell === '.')
     );
 
@@ -131,8 +164,9 @@ function Game() {
   return (
     <div className="game-container">
       <h1>Sokoban Game</h1>
-      <div>Aktuelle Züge: {moveCount}</div>
-      <div>Highscore für dieses Level: {highscore !== null ? highscore : 'Noch kein Highscore vorhanden'}</div>
+      <div className="current-move">Aktuelle Züge: {moveCount}</div>
+      <div className="highscore">Highscore für dieses Level: {highscore !== null ? highscore : 'Noch kein Highscore vorhanden'}</div>
+
       {isCompleted && <div className="level-completed">Level abgeschlossen!</div>}
       <div className="error-message">{error && error}</div>
       <div className="game-board">

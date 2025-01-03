@@ -2,30 +2,6 @@ import React, { useState } from 'react';
 import { Container, TextField, Button, Typography, Box, Alert, Link } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import './login.css'; 
-import { styled } from '@mui/system';
-
-const BackgroundContainer = styled('div')({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  width: '100vw',
-  height: '100vh',
-  backgroundImage: `url('/bilder/Background.jpg')`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  zIndex: -1,
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    zIndex: -1,
-  },
-});
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -46,8 +22,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    
-    // Validierung
+
     if (!validateEmail(email)) {
       setError('Bitte geben Sie eine gültige E-Mail-Adresse ein');
       return;
@@ -59,9 +34,8 @@ const Login = () => {
     }
 
     setLoading(true);
-  
+
     try {
-      // OAuth Token Request
       const tokenResponse = await fetch('http://localhost:3000/api/token', {
         method: 'POST',
         credentials: 'include',
@@ -75,15 +49,14 @@ const Login = () => {
           client_id: 'client'
         })
       });
-  
+
       if (tokenResponse.ok) {
         const tokenData = await tokenResponse.json();
-        
-        // Speichere Tokens sicher
+
         localStorage.setItem('accessToken', tokenData.access_token);
         localStorage.setItem('refreshToken', tokenData.refresh_token);
         localStorage.setItem('tokenExpiry', new Date(Date.now() + tokenData.expires_in * 1000).toISOString());
-        
+
         navigate('/levels');
       } else {
         const errorData = await tokenResponse.json();
@@ -103,7 +76,7 @@ const Login = () => {
         <h1 className="h1">Welcome to the Sokoban Game</h1>
       </div>
 
-      <BackgroundContainer />
+      <div className="background-container"></div>
       <Container maxWidth="xs" sx={{ zIndex: 1, mt: 6 }}>
         <div className="login-container">
           <Typography variant="h4" gutterBottom className="login-header">
