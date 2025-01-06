@@ -15,6 +15,25 @@ async function writeAccess(req, res, next) {
   }
 }
 
+// Middleware to verify token and get user
+const authenticateToken = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const db = req.app.get('db');
+    const user = await db.collection('users').findOne({ username: req.user.username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    req.userProfile = user;
+    next();
+  } catch (error) {
+    console.error('Auth error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 router.post('/todo', writeAccess, async (req, res) => {
   try {
     const db = req.app.get('db');
@@ -40,19 +59,57 @@ router.post('/todo', writeAccess, async (req, res) => {
   }
 });
 
+// Get user profile
+router.get('/user/profile', authenticateToken, async (req, res) => {
+  try {
+    res.json(req.userProfile);
+  } catch (error) {
+    console.error('Profile error:', error);
+    res.status(500).json({ error: 'Failed to get user profile' });
+  }
+});
 
-// Alle Benutzer abrufen
-router.get('/user', async (req, res) => {
-    try {
-      const db = req.app.get('db'); 
-      const users = await db.collection('users').find({}).toArray();
-      res.json(users); 
-
-    } catch (err) {
-      console.error(err);
-      res.status(500).send(); 
+// Get user profile
+router.get('/profile', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
-  });
+
+    const db = req.app.get('db');
+    const user = await db.collection('users').findOne({ 
+      username: req.user.username,
+      active: true
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Return only necessary user information
+    const userProfile = {
+      username: user.username,
+      email: user.email
+    };
+
+    res.json(userProfile);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all users
+router.get('/users', async (req, res) => {
+  try {
+    const db = req.app.get('db');
+    const users = await db.collection('users').find({}).toArray();
+    res.json(users);
+  } catch (error) {
+    console.error('Error getting users:', error);
+    res.status(500).json({ error: 'Failed to get users' });
+  }
+});
 
 // Benutzer nach ID frgn
 router.get('/user/:id', async (req, res) => {
@@ -125,7 +182,6 @@ router.put('/user/:id', async (req, res) => {
         res.status(500).send();
       }
 });
-             
 
 // Benutzer löschen
 router.delete('/user/:id', async (req, res) => {
@@ -133,7 +189,7 @@ router.delete('/user/:id', async (req, res) => {
     const db = req.app.get('db');
     const result = await db.collection('users').deleteOne({ _id: new ObjectId(req.params.id) });
     
-    if (deleted.deletedCount === 1) {
+    if (result.deletedCount === 1) {
       res.send();
     } else {
       res.status(404).send();

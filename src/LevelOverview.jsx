@@ -1,7 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button, Typography, Box } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button, Typography, Box, Paper } from '@mui/material';
 import { styled } from '@mui/system';
+import axios from 'axios';
 
 const levels = [
   { id: 0, name: 'Level 1' },
@@ -43,62 +44,117 @@ const SubTitle = styled(Typography)({
 });
 
 const LevelButton = styled(Button)({
-  margin: '0px',
+  margin: '10px',
   padding: '20px 50px',
   backgroundColor: '#1E88E5', 
   color: '#FFFFFF', 
   borderRadius: '30px',
   fontSize: '20px',
-  fontWeight: '600',
-  textTransform: 'uppercase',
-  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
   '&:hover': {
-    backgroundColor: '#1565C0', 
-    boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
-  },
-  transition: 'background-color 0.3s ease, transform 0.2s ease',
-  '&:active': {
-    transform: 'scale(0.98)', 
+    backgroundColor: '#1565C0',
   },
 });
 
-const BackButton = styled(Button)({
-  marginTop: '40px',
-  padding: '15px 50px',
-  backgroundColor: '#333333', 
+const ScoreCard = styled(Paper)({
+  padding: '10px',
+  margin: '5px 0',
+  backgroundColor: '#1E1E1E',
   color: '#E6E6E6',
-  borderRadius: '30px',
-  fontSize: '18px',
-  textTransform: 'none',
-  '&:hover': {
-    backgroundColor: '#444444', 
-  },
+  display: 'flex',
+  justifyContent: 'space-between',
+  width: '100%',
 });
 
 function LevelOverview() {
+  const [highscores, setHighscores] = useState({});
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuthAndLoadHighscores = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          navigate('/');
+          return;
+        }
+        const authResponse = await axios.get('http://localhost:3000/api/user/profile', {
+          headers: { 
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!authResponse.data) {
+          navigate('/');
+          return;
+        }
+
+        const scores = {};
+        for (const level of levels) {
+          try {
+            const response = await axios.get(`http://localhost:3000/highscore/level/${level.id}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            scores[level.id] = response.data;
+          } catch (error) {
+            console.error(`Error loading highscores for level ${level.id}:`, error);
+            scores[level.id] = [];
+          }
+        }
+        setHighscores(scores);
+      } catch (error) {
+        console.error('Error loading highscores:', error);
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          navigate('/');
+        }
+      }
+    };
+
+    checkAuthAndLoadHighscores();
+  }, [navigate]);
+
   return (
     <LevelContainer>
       <Title>Wähle dein Level</Title>
-      <SubTitle>Bereit für das Abenteuer?</SubTitle>
+      <SubTitle>Bereit für das nächste?</SubTitle>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          width: '100%',
-          gap: '20px', 
-        }}
-      >
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', width: '100%', maxWidth: '800px' }}>
         {levels.map((level) => (
-          <Link key={level.id} to={`/game/${level.id}`} style={{ textDecoration: 'none' }}>
-            <LevelButton variant="contained">{level.name}</LevelButton>
-          </Link>
+          <Box key={level.id} sx={{ width: '100%', maxWidth: '350px' }}>
+            <Link to={`/game/${level.id}`} style={{ textDecoration: 'none' }}>
+              <LevelButton variant="contained" fullWidth>
+                {level.name}
+              </LevelButton>
+            </Link>
+            
+            {/* Highscores for this level */}
+            <Box sx={{ mt: 1, mb: 3 }}>
+              <Typography variant="h6" sx={{ color: '#B0B0B0', mb: 1 }}>
+                Highscores:
+              </Typography>
+              {highscores[level.id]?.slice(0, 3).map((score, index) => (
+                <ScoreCard key={index} elevation={2}>
+                  <Typography>{score.username}</Typography>
+                  <Typography>{score.score} Züge</Typography>
+                </ScoreCard>
+              ))}
+              {(!highscores[level.id] || highscores[level.id].length === 0) && (
+                <Typography sx={{ color: '#666' }}>
+                  Noch keine Highscores
+                </Typography>
+              )}
+            </Box>
+          </Box>
         ))}
       </Box>
 
-      <Link to="/" style={{ textDecoration: 'none' }}>
-        <BackButton variant="contained">Zurück zur Anmeldung</BackButton>
+      <Link to="/" style={{ textDecoration: 'none', marginTop: '30px' }}>
+        <LevelButton variant="contained">
+          Zurück zur Anmeldung
+        </LevelButton>
       </Link>
     </LevelContainer>
   );

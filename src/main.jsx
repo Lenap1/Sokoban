@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import App from './App.jsx'; 
 import Login from './Login.jsx'; 
+import Register from './Register.jsx';
 import LevelOverview from './LevelOverview.jsx'; 
 import Game from './Game.jsx'; 
 import './index.css';
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
       {
         index: true,           
         element: <Login />,
+      },
+      {
+        path: "register",
+        element: <Register />,
       },
       {
         path: "levels",        
