@@ -18,14 +18,14 @@ export default function oAuthModel(db) {
                     return null;
                 }
 
-                // Prüfe ob Token abgelaufen ist
+                // Check if token is expired
                 if (token.accessTokenExpiresAt < new Date()) {
                     await db.collection('token').deleteOne({ accessToken });
                     return null;
                 }
 
                 token.client = client;
-                token.user = await db.collection('user_auth').findOne({ _id: token.user_id });
+                token.user = await db.collection('users').findOne({ _id: token.user_id });
                 
                 if (!token.user) {
                     await db.collection('token').deleteOne({ accessToken });
@@ -34,7 +34,7 @@ export default function oAuthModel(db) {
 
                 return token;
             } catch (error) {
-                console.error('Fehler beim Abrufen des Access Tokens:', error);
+                console.error('Error getting access token:', error);
                 return null;
             }
         },
@@ -46,14 +46,14 @@ export default function oAuthModel(db) {
                     return null;
                 }
 
-                // Prüfe ob Token abgelaufen ist
+                // Check if token is expired
                 if (token.refreshTokenExpiresAt < new Date()) {
                     await db.collection('token').deleteOne({ refreshToken });
                     return null;
                 }
 
                 token.client = client;
-                token.user = await db.collection('user_auth').findOne({ _id: token.user_id });
+                token.user = await db.collection('users').findOne({ _id: token.user_id });
 
                 if (!token.user) {
                     await db.collection('token').deleteOne({ refreshToken });
@@ -62,16 +62,16 @@ export default function oAuthModel(db) {
 
                 return token;
             } catch (error) {
-                console.error('Fehler beim Abrufen des Refresh Tokens:', error);
+                console.error('Error getting refresh token:', error);
                 return null;
             }
         },
 
         async getUser(username, password) {
             try {
-                const user = await db.collection('user_auth').findOne({ 
-                    username,
-                    active: true // Nur aktive Benutzer können sich einloggen
+                const user = await db.collection('users').findOne({ 
+                    email: username,  
+                    active: true
                 });
 
                 if (!user) {
@@ -83,16 +83,19 @@ export default function oAuthModel(db) {
                     return null;
                 }
 
-                return user;
+                return {
+                    ...user,
+                    username: user.email  
+                };
             } catch (error) {
-                console.error('Fehler beim Benutzer-Login:', error);
+                console.error('Error during user login:', error);
                 return null;
             }
         },
 
         async saveToken(token, client, user) {
             try {
-                // Lösche alte Tokens des Benutzers
+                // Delete 
                 await db.collection('token').deleteMany({ 
                     user_id: user._id,
                     $or: [
@@ -101,47 +104,30 @@ export default function oAuthModel(db) {
                     ]
                 });
 
-                // Speichere neue Tokens
-                const accessTokenDoc = {
+                const tokenToSave = {
                     accessToken: token.accessToken,
                     accessTokenExpiresAt: token.accessTokenExpiresAt,
-                    user_id: user._id,
-                    client_id: client.id,
-                    created_at: new Date()
-                };
-
-                const refreshTokenDoc = {
                     refreshToken: token.refreshToken,
                     refreshTokenExpiresAt: token.refreshTokenExpiresAt,
                     user_id: user._id,
-                    client_id: client.id,
-                    created_at: new Date()
+                    client: client,
+                    user: user
                 };
 
-                await Promise.all([
-                    db.collection('token').insertOne(accessTokenDoc),
-                    db.collection('token').insertOne(refreshTokenDoc)
-                ]);
-
-                return { ...token, client, user };
+                await db.collection('token').insertOne(tokenToSave);
+                return tokenToSave;
             } catch (error) {
-                console.error('Fehler beim Speichern der Tokens:', error);
-                throw error;
+                console.error('Error saving token:', error);
+                return null;
             }
         },
 
-        // Neue Methode zum Löschen von Tokens (Logout)
         async revokeToken(token) {
             try {
-                const result = await db.collection('token').deleteOne({ 
-                    $or: [
-                        { accessToken: token.accessToken },
-                        { refreshToken: token.refreshToken }
-                    ]
-                });
-                return result.deletedCount > 0;
+                const result = await db.collection('token').deleteOne({ refreshToken: token.refreshToken });
+                return result.deletedCount === 1;
             } catch (error) {
-                console.error('Fehler beim Löschen des Tokens:', error);
+                console.error('Error revoking token:', error);
                 return false;
             }
         }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, TextField, Button, Typography, Box, Alert, Link } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import './login.css'; 
+import './login.css';
 import { styled } from '@mui/system';
 
 const BackgroundContainer = styled('div')({
@@ -27,9 +27,10 @@ const BackgroundContainer = styled('div')({
   },
 });
 
-const Login = () => {
+const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -40,66 +41,65 @@ const Login = () => {
   };
 
   const validatePassword = (password) => {
-    return password.length >= 8;
+    return password.length >= 8 && 
+           /[A-Z]/.test(password) && 
+           /[a-z]/.test(password) && 
+           /[0-9]/.test(password);
   };
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
-    
-    // Validierung
+
     if (!validateEmail(email)) {
       setError('Bitte geben Sie eine gültige E-Mail-Adresse ein');
       return;
     }
 
     if (!validatePassword(password)) {
-      setError('Das Passwort muss mindestens 8 Zeichen lang sein');
+      setError('Das Passwort muss mindestens 8 Zeichen lang sein und Großbuchstaben, Kleinbuchstaben und Zahlen enthalten');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Die Passwörter stimmen nicht überein');
       return;
     }
 
     setLoading(true);
-  
+
     try {
-      // OAuth Token Request
-      const tokenResponse = await fetch('http://localhost:3000/api/token', {
+      const response = await fetch('http://localhost:3000/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: new URLSearchParams({
-          grant_type: 'password',
-          username: email,
-          password: password,
-          client_id: 'client'
-        }).toString()
+        body: JSON.stringify({
+          email,
+          password
+        })
       });
-  
-      if (!tokenResponse.ok) {
-        const errorText = await tokenResponse.text();
+
+      if (!response.ok) {
+        const errorText = await response.text();
         let errorMessage;
         try {
           const errorData = JSON.parse(errorText);
-          errorMessage = errorData.error_description || 'Ungültige Anmeldedaten';
+          errorMessage = errorData.error || 'Ein Fehler ist aufgetreten';
         } catch (e) {
-          errorMessage = 'Ungültige Anmeldedaten';
+          errorMessage = 'Ein Fehler ist aufgetreten';
         }
         setError(errorMessage);
         return;
       }
 
-      const tokenData = await tokenResponse.json();
+      const data = await response.json();
       
-      // Speichere Tokens sicher
-      localStorage.setItem('accessToken', tokenData.access_token);
-      if (tokenData.refresh_token) {
-        localStorage.setItem('refreshToken', tokenData.refresh_token);
-      }
-      localStorage.setItem('tokenExpiry', new Date(Date.now() + (tokenData.expires_in || 3600) * 1000).toISOString());
-      
-      navigate('/levels');
+      // Zeige Erfolgsmeldung und leite zur Login-Seite weiter
+      alert('Registrierung erfolgreich! Sie können sich jetzt einloggen.');
+      navigate('/');
     } catch (error) {
-      console.error('Fehler beim Login:', error);
+      console.error('Fehler bei der Registrierung:', error);
       setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
     } finally {
       setLoading(false);
@@ -116,14 +116,14 @@ const Login = () => {
       <Container maxWidth="xs" sx={{ zIndex: 1, mt: 6 }}>
         <div className="login-container">
           <Typography variant="h4" gutterBottom className="login-header">
-            Login
+            Registrierung
           </Typography>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
-          <Box component="form" onSubmit={handleLogin} className="login-form">
+          <Box component="form" onSubmit={handleRegister} className="login-form">
             <TextField
               label="E-Mail"
               variant="outlined"
@@ -145,6 +145,18 @@ const Login = () => {
               required
               className="login-input"
               disabled={loading}
+              helperText="Mindestens 8 Zeichen, ein Großbuchstabe, ein Kleinbuchstabe und eine Zahl"
+            />
+            <TextField
+              label="Passwort bestätigen"
+              variant="outlined"
+              type="password"
+              fullWidth
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="login-input"
+              disabled={loading}
             />
             <Button
               type="submit"
@@ -153,11 +165,11 @@ const Login = () => {
               className="login-button"
               disabled={loading}
             >
-              {loading ? 'Anmeldung...' : 'Anmelden'}
+              {loading ? 'Registrierung...' : 'Registrieren'}
             </Button>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
-              <Link href="/register" variant="body2">
-                Noch kein Konto? Hier registrieren
+              <Link href="/" variant="body2">
+                Zurück zum Login
               </Link>
             </Box>
           </Box>
@@ -167,4 +179,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
