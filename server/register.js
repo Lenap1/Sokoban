@@ -11,19 +11,16 @@ const validateEmail = (email) => {
 
 // Passwort Validierung
 const validatePassword = (password) => {
-    return password.length >= 8 && 
-           /[A-Z]/.test(password) && 
-           /[a-z]/.test(password) && 
-           /[0-9]/.test(password);
+    return password.length >= 8;
 };
 
 router.post('/', async (req, res) => {
     try {
         const db = req.app.get('db');
-        const { email, password } = req.body;
+        const { username, email, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich' });
+        if (!email || !password || !username) {
+            return res.status(400).json({ error: 'Username, E-Mail und Passwort sind erforderlich' });
         }
 
         if (!validateEmail(email)) {
@@ -32,42 +29,38 @@ router.post('/', async (req, res) => {
 
         if (!validatePassword(password)) {
             return res.status(400).json({ 
-                error: 'Passwort muss mindestens 8 Zeichen lang sein und Großbuchstaben, Kleinbuchstaben und Zahlen enthalten' 
+                error: 'Passwort muss mindestens 8 Zeichen lang sein' 
             });
         }
 
-        const existingUser = await db.collection('users').findOne({ email });
+        const existingUser = await db.collection('users').findOne({ 
+            $or: [{ email }, { username }] 
+        });
+        
         if (existingUser) {
-            return res.status(409).json({ error: 'E-Mail bereits registriert' });
+            return res.status(409).json({ 
+                error: existingUser.email === email ? 'E-Mail bereits registriert' : 'Benutzername bereits vergeben' 
+            });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = {
+        const result = await db.collection('users').insertOne({
+            username,
             email,
             password: hashedPassword,
-            username: email,  
             created_at: new Date(),
-            active: true,
-            highscores: []
-        };
-
-        const result = await db.collection('users').insertOne(newUser);
-        
-        if (!result.acknowledged) {
-            throw new Error('Failed to insert user');
-        }
-
-        res.status(201).json({
-            success: true,
-            message: 'Registrierung erfolgreich'
+            active: true
         });
 
+        if (result.acknowledged) {
+            res.status(201).json({ message: 'Registrierung erfolgreich' });
+        } else {
+            res.status(500).json({ error: 'Registrierung fehlgeschlagen' });
+        }
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ 
-            error: 'Ein Fehler ist bei der Registrierung aufgetreten'
-        });
+        res.status(500).json({ error: 'Interner Server-Fehler' });
     }
 });
 
