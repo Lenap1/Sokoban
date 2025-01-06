@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Box, Container, Typography, Button, Paper, Grid, IconButton } from '@mui/material';
+import { ArrowUpward, ArrowDownward, ArrowBack, ArrowForward, Refresh, ExitToApp } from '@mui/icons-material';
 import axios from 'axios';
 import playerImg from './assets/player.png';
 import boxImg from './assets/box.png';
 import goalImg from './assets/goal.png';
 import wallImg from './assets/wall.png';
 import floorImg from './assets/floor.png';
-import './Game.css';  
 
 const levels = [
   // Level 1: 
@@ -64,7 +65,7 @@ function findPlayer(board) {
 }
 
 function Game() {
-  const { levelId } = useParams(); 
+  const { levelId } = useParams();
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(parseInt(levelId, 10));
   const [board, setBoard] = useState([]);
@@ -108,7 +109,6 @@ function Game() {
     checkAuthAndLoadLevel();
   }, [currentLevel, navigate]);
 
-  // Tastatur steuerung
   useEffect(() => {
     const handleKeyPress = (event) => {
       switch (event.key.toLowerCase()) {
@@ -134,11 +134,8 @@ function Game() {
     };
 
     window.addEventListener('keydown', handleKeyPress);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [playerPosition, board, isCompleted]); // Dependencies for movePlayer
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [playerPosition, board, isCompleted]);
 
   const loadHighscores = async () => {
     try {
@@ -193,22 +190,14 @@ function Game() {
     checkCompletion(updatedBoard);
   };
 
-  const checkCompletion = (updatedBoard) => {
+  const checkCompletion = async (updatedBoard) => {
     const allBoxesOnGoals = updatedBoard.every(row => 
       row.every(cell => cell !== '$' || cell === '.')
     );
 
     if (allBoxesOnGoals) {
       setIsCompleted(true);
-      saveHighscore();
-      setTimeout(() => {
-        if (currentLevel < levels.length - 1) {
-          navigate(`/game/${currentLevel + 1}`);
-        } else {
-          alert("Glückwunsch! Du hast alle Level abgeschlossen!");
-          navigate('/levels');
-        }
-      }, 1500); // 1.5 Sekunden warten
+      await saveHighscore();
     }
   };
 
@@ -229,94 +218,351 @@ function Game() {
 
       if (response.data.success) {
         console.log('Highscore saved successfully!');
-        await loadHighscores(); // Reload highscores after saving
+        await loadHighscores();
       }
     } catch (error) {
       console.error('Failed to save highscore:', error);
     }
   };
 
-  const restartLevel = () => {
-    loadLevel(currentLevel);
-  };
-
-  const nextLevel = () => {
-    if (currentLevel < levels.length - 1) {
+  const handleNextLevel = () => {
+    if (currentLevel < 4) {
       setCurrentLevel(currentLevel + 1);
+      loadLevel(currentLevel + 1);
+      setIsCompleted(false);
     } else {
-      alert("Du hast das letzte Level erreicht!");
+      navigate('/levels');
     }
   };
 
   return (
-    <div className="game-container">
-      <div className="game-header">
-        <h1>Sokoban Game</h1>
-        <div className="game-info">
-          <p>Level: {currentLevel + 1}</p>
-          <p>Moves: {moveCount}</p>
-        </div>
-      </div>
+    <Box
+      sx={{
+        backgroundColor: '#2c1b47',
+        minHeight: '100vh',
+        padding: '2rem',
+        fontFamily: 'Poppins, sans-serif'
+      }}
+    >
+      <Container maxWidth="lg">
+        <Grid container spacing={3}>
+          {/* Header */}
+          <Grid item xs={12}>
+            <Paper
+              sx={{
+                padding: 2,
+                backgroundColor: '#3d2661',
+                border: '2px solid #ffd700',
+                borderRadius: '15px',
+                marginBottom: 3
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    color: '#ffd700',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Level {currentLevel + 1}
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    color: '#ffd700'
+                  }}
+                >
+                  Züge: {moveCount}
+                </Typography>
+              </Box>
+            </Paper>
+          </Grid>
 
-      <div className="game-content">
-        <div className="game-board">
-          {board.map((row, y) => (
-            <div key={y} className="row">
-              {row.map((cell, x) => (
-                <div key={`${x}-${y}`} className="cell">
-                  <img
-                    src={
-                      cell === '#' ? wallImg :
-                      cell === '@' ? playerImg :
-                      cell === '$' ? boxImg :
-                      cell === '.' ? goalImg :
-                      floorImg
+          {/* Game Board */}
+          <Grid item xs={12} md={8}>
+            <Paper
+              sx={{
+                padding: 2,
+                backgroundColor: '#3d2661',
+                border: '2px solid #ffd700',
+                borderRadius: '15px'
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'grid',
+                  gap: 1,
+                  justifyContent: 'center'
+                }}
+              >
+                {board.map((row, y) => (
+                  <Box
+                    key={y}
+                    sx={{
+                      display: 'flex',
+                      gap: 1
+                    }}
+                  >
+                    {row.map((cell, x) => (
+                      <Box
+                        key={`${x}-${y}`}
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <img
+                          src={
+                            cell === '#' ? wallImg :
+                            cell === '@' ? playerImg :
+                            cell === '$' ? boxImg :
+                            cell === '.' ? goalImg :
+                            floorImg
+                          }
+                          alt={cell}
+                          style={{ width: '100%', height: '100%' }}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                ))}
+              </Box>
+
+              {/* Controls */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                  marginTop: 3
+                }}
+              >
+                <IconButton
+                  onClick={() => movePlayer(0, -1)}
+                  sx={{
+                    backgroundColor: '#ffd700',
+                    color: '#2c1b47',
+                    '&:hover': {
+                      backgroundColor: '#e6c200'
                     }
-                    alt={cell}
-                  />
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
+                  }}
+                >
+                  <ArrowUpward />
+                </IconButton>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <IconButton
+                    onClick={() => movePlayer(-1, 0)}
+                    sx={{
+                      backgroundColor: '#ffd700',
+                      color: '#2c1b47',
+                      '&:hover': {
+                        backgroundColor: '#e6c200'
+                      }
+                    }}
+                  >
+                    <ArrowBack />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => movePlayer(0, 1)}
+                    sx={{
+                      backgroundColor: '#ffd700',
+                      color: '#2c1b47',
+                      '&:hover': {
+                        backgroundColor: '#e6c200'
+                      }
+                    }}
+                  >
+                    <ArrowDownward />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => movePlayer(1, 0)}
+                    sx={{
+                      backgroundColor: '#ffd700',
+                      color: '#2c1b47',
+                      '&:hover': {
+                        backgroundColor: '#e6c200'
+                      }
+                    }}
+                  >
+                    <ArrowForward />
+                  </IconButton>
+                </Box>
+              </Box>
+            </Paper>
+          </Grid>
 
-        <div className="highscore-panel">
-          <h2>Highscores</h2>
-          {highscores.length > 0 ? (
-            <ul className="highscore-list">
-              {highscores.map((score, index) => (
-                <li key={index}>
-                  {score.userId.username}: {score.score} moves
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No highscores yet!</p>
-          )}
-        </div>
-      </div>
+          {/* Highscores */}
+          <Grid item xs={12} md={4}>
+            <Paper
+              sx={{
+                padding: 2,
+                backgroundColor: '#3d2661',
+                border: '2px solid #ffd700',
+                borderRadius: '15px',
+                height: '100%'
+              }}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  color: '#ffd700',
+                  marginBottom: 2,
+                  textAlign: 'center'
+                }}
+              >
+                Highscores
+              </Typography>
+              {highscores.length > 0 ? (
+                <Box sx={{ color: '#ffffff' }}>
+                  {highscores.map((score, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: 1,
+                        borderBottom: '1px solid #ffd700'
+                      }}
+                    >
+                      <Typography>{score.userId.username}</Typography>
+                      <Typography>{score.score} Züge</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              ) : (
+                <Typography sx={{ color: '#ffffff', textAlign: 'center' }}>
+                  Noch keine Highscores
+                </Typography>
+              )}
+            </Paper>
+          </Grid>
 
-      {error && <div className="error-message">{error}</div>}
-      
-      {isCompleted && (
-        <div className="level-complete">
-          <h2>Level Complete!</h2>
-          <p>You completed the level in {moveCount} moves!</p>
-          {currentLevel < levels.length - 1 && (
-            <button onClick={() => setCurrentLevel(currentLevel + 1)}>
-              Next Level
-            </button>
-          )}
-        </div>
-      )}
+          {/* Action Buttons */}
+          <Grid item xs={12}>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+              <Button
+                startIcon={<Refresh />}
+                onClick={() => loadLevel(currentLevel)}
+                sx={{
+                  backgroundColor: '#ffd700',
+                  color: '#2c1b47',
+                  '&:hover': {
+                    backgroundColor: '#e6c200'
+                  }
+                }}
+              >
+                Level neu starten
+              </Button>
+              <Button
+                startIcon={<ExitToApp />}
+                onClick={() => navigate('/levels')}
+                sx={{
+                  backgroundColor: '#ffd700',
+                  color: '#2c1b47',
+                  '&:hover': {
+                    backgroundColor: '#e6c200'
+                  }
+                }}
+              >
+                Zurück zur Übersicht
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
 
-      <div className="controls">
-        <button onClick={() => movePlayer(0, -1)}>Up</button>
-        <button onClick={() => movePlayer(-1, 0)}>Left</button>
-        <button onClick={() => movePlayer(0, 1)}>Down</button>
-        <button onClick={() => movePlayer(1, 0)}>Right</button>
-      </div>
-    </div>
+        {/* Level Complete Dialog */}
+        {isCompleted && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 1000
+            }}
+          >
+            <Paper
+              sx={{
+                padding: 4,
+                backgroundColor: '#3d2661',
+                border: '2px solid #ffd700',
+                borderRadius: '15px',
+                textAlign: 'center'
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  color: '#ffd700',
+                  marginBottom: 2
+                }}
+              >
+                Level geschafft!
+              </Typography>
+              <Typography
+                sx={{
+                  color: '#ffffff',
+                  marginBottom: 3
+                }}
+              >
+                Du hast das Level in {moveCount} Zügen geschafft!
+              </Typography>
+              {currentLevel < 4 ? (
+                <Button
+                  variant="contained"
+                  onClick={handleNextLevel}
+                  sx={{
+                    backgroundColor: '#ffd700',
+                    color: '#2c1b47',
+                    padding: '10px 30px',
+                    fontSize: '1.1rem',
+                    '&:hover': {
+                      backgroundColor: '#e6c200'
+                    }
+                  }}
+                >
+                  Weiter zu Level {currentLevel + 2}
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/levels')}
+                  sx={{
+                    backgroundColor: '#ffd700',
+                    color: '#2c1b47',
+                    padding: '10px 30px',
+                    fontSize: '1.1rem',
+                    '&:hover': {
+                      backgroundColor: '#e6c200'
+                    }
+                  }}
+                >
+                  Zurück zur Übersicht
+                </Button>
+              )}
+            </Paper>
+          </Box>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <Typography
+            sx={{
+              color: '#ff6b6b',
+              textAlign: 'center',
+              marginTop: 2
+            }}
+          >
+            {error}
+          </Typography>
+        )}
+      </Container>
+    </Box>
   );
 }
 

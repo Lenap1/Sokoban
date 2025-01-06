@@ -20,7 +20,7 @@ const port = 3000;
 
 // CORS 
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -46,10 +46,14 @@ try {
   db.collection('token').createIndex({ refreshTokenExpiresAt: 1 }, { expireAfterSeconds: 0 });
   db.collection('token').createIndex({ emailTokenExpiresAt: 1 }, { expireAfterSeconds: 0 });
 
+  // Registrierungsroute vor OAuth
+  app.use('/api/user/register', register);
+
+  // OAuth Setup
   const oauth = new OAuthServer({ 
     model: oAuthModel(db),
     accessTokenLifetime: 3600, // 1 h
-    refreshTokenLifetime: 1209600, // 14  t
+    refreshTokenLifetime: 7 * 24 * 3600, // 7 t
     allowBearerTokensInQueryString: true,
     allowEmptyState: true,
     authenticateHandler: {
@@ -75,6 +79,8 @@ try {
       }
     }
   }); 
+
+  app.oauth = oauth;
 
   // Middleware 
   const authenticateRequest = async (req, res, next) => {
@@ -115,8 +121,7 @@ try {
     }
   }));
 
-  app.use('/register', register);
-  
+  // OAuth geschützte Routen
   app.use('/api/user', authenticateRequest, api);
   app.use('/highscore', authenticateRequest, highscoreRoutes);
 

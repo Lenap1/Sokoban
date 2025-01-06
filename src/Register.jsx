@@ -1,182 +1,244 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Alert, Link } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import './login.css';
-import { styled } from '@mui/system';
+import { useNavigate, Link } from 'react-router-dom';
+import { Box, Container, Typography, TextField, Button, Paper } from '@mui/material';
+import axios from 'axios';
 
-const BackgroundContainer = styled('div')({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  width: '100vw',
-  height: '100vh',
-  backgroundImage: `url('/bilder/Background.jpg')`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  zIndex: -1,
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    zIndex: -1,
-  },
-});
-
-const Register = () => {
+function Register() {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const validatePassword = (password) => {
-    return password.length >= 8 && 
-           /[A-Z]/.test(password) && 
-           /[a-z]/.test(password) && 
-           /[0-9]/.test(password);
-  };
-
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (!validateEmail(email)) {
-      setError('Bitte geben Sie eine gültige E-Mail-Adresse ein');
-      return;
-    }
-
-    if (!validatePassword(password)) {
-      setError('Das Passwort muss mindestens 8 Zeichen lang sein und Großbuchstaben, Kleinbuchstaben und Zahlen enthalten');
-      return;
-    }
-
+    
     if (password !== confirmPassword) {
-      setError('Die Passwörter stimmen nicht überein');
+      setError('Passwörter stimmen nicht überein');
       return;
     }
-
-    setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
+      await axios.post('http://localhost:3000/api/user/register', {
+        username,
+        email,
+        password
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage;
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.error || 'Ein Fehler ist aufgetreten';
-        } catch (e) {
-          errorMessage = 'Ein Fehler ist aufgetreten';
-        }
-        setError(errorMessage);
-        return;
-      }
-
-      const data = await response.json();
-      
-      // Zeige Erfolgsmeldung und leite zur Login-Seite weiter
-      alert('Registrierung erfolgreich! Sie können sich jetzt einloggen.');
-      navigate('/');
-    } catch (error) {
-      console.error('Fehler bei der Registrierung:', error);
-      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
-    } finally {
-      setLoading(false);
+      navigate('/login');
+    } catch (err) {
+      setError('Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.');
+      console.error('Registration error:', err);
     }
   };
 
   return (
-    <>
-      <div>
-        <h1 className="h1">Welcome to the Sokoban Game</h1>
-      </div>
-
-      <BackgroundContainer />
-      <Container maxWidth="xs" sx={{ zIndex: 1, mt: 6 }}>
-        <div className="login-container">
-          <Typography variant="h4" gutterBottom className="login-header">
+    <Box
+      sx={{
+        backgroundColor: '#2c1b47',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Poppins, sans-serif'
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={3}
+          sx={{
+            padding: 4,
+            backgroundColor: '#3d2661',
+            border: '2px solid #ffd700',
+            borderRadius: '15px'
+          }}
+        >
+          <Typography
+            variant="h3"
+            sx={{
+              color: '#ffd700',
+              textAlign: 'center',
+              marginBottom: 4,
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '2px'
+            }}
+          >
             Registrierung
           </Typography>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          <Box component="form" onSubmit={handleRegister} className="login-form">
+
+          <form onSubmit={handleSubmit}>
             <TextField
-              label="E-Mail"
-              variant="outlined"
               fullWidth
+              label="Benutzername"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              margin="normal"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#ffd700',
+                },
+                '& .MuiOutlinedInput-input': {
+                  color: '#ffffff',
+                },
+                marginBottom: 2
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="E-Mail"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              className="login-input"
-              disabled={loading}
+              margin="normal"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#ffd700',
+                },
+                '& .MuiOutlinedInput-input': {
+                  color: '#ffffff',
+                },
+                marginBottom: 2
+              }}
             />
+
             <TextField
-              label="Passwort"
-              variant="outlined"
-              type="password"
               fullWidth
+              type="password"
+              label="Passwort"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              className="login-input"
-              disabled={loading}
-              helperText="Mindestens 8 Zeichen, ein Großbuchstabe, ein Kleinbuchstabe und eine Zahl"
+              margin="normal"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#ffd700',
+                },
+                '& .MuiOutlinedInput-input': {
+                  color: '#ffffff',
+                },
+                marginBottom: 2
+              }}
             />
+
             <TextField
-              label="Passwort bestätigen"
-              variant="outlined"
-              type="password"
               fullWidth
+              type="password"
+              label="Passwort bestätigen"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="login-input"
-              disabled={loading}
+              margin="normal"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ffd700',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#ffd700',
+                },
+                '& .MuiOutlinedInput-input': {
+                  color: '#ffffff',
+                },
+                marginBottom: 3
+              }}
             />
+
+            {error && (
+              <Typography
+                sx={{
+                  color: '#ff6b6b',
+                  marginBottom: 2,
+                  textAlign: 'center'
+                }}
+              >
+                {error}
+              </Typography>
+            )}
+
             <Button
               type="submit"
-              variant="contained"
               fullWidth
-              className="login-button"
-              disabled={loading}
+              sx={{
+                backgroundColor: '#ffd700',
+                color: '#2c1b47',
+                padding: '12px',
+                fontWeight: 'bold',
+                fontSize: '1.1rem',
+                '&:hover': {
+                  backgroundColor: '#e6c200',
+                },
+                marginBottom: 2
+              }}
             >
-              {loading ? 'Registrierung...' : 'Registrieren'}
+              Registrieren
             </Button>
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
-              <Link href="/" variant="body2">
-                Zurück zum Login
+
+            <Box
+              sx={{
+                textAlign: 'center',
+                marginTop: 2
+              }}
+            >
+              <Link
+                to="/login"
+                style={{
+                  color: '#ffd700',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
+                <Typography>
+                  Hier registrieren
+                </Typography>
               </Link>
             </Box>
-          </Box>
-        </div>
+          </form>
+        </Paper>
       </Container>
-    </>
+    </Box>
   );
-};
+}
 
 export default Register;
