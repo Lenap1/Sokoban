@@ -15,7 +15,6 @@ function Login() {
     setError('');
 
     try {
-      // OAuth Token Request
       const tokenResponse = await fetch('http://localhost:3000/api/token', {
         method: 'POST',
         headers: {

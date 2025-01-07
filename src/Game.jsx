@@ -51,6 +51,7 @@ const levels = [
 ##########`,
 ];
 
+
 function parseLevel(levelStr) {
   return levelStr.split('\n').map(row => row.split(''));
 }
