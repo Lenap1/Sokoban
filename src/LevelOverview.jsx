@@ -156,7 +156,6 @@ function LevelOverview() {
                   </Typography>
                   {highscores[level.id]?.slice(0, 3).map((score, index) => (
                     <Box key={index} sx={{ mb: 1 }}>
-                      <Typography>{score.username}</Typography>
                       <Typography>{score.score} Züge</Typography>
                     </Box>
                   ))}
